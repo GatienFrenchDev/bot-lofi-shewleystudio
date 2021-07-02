@@ -1,32 +1,18 @@
-const { TOKEN, CHANNEL, STATUS, LIVE } = require("./config.json");
+const { CHANNEL, STATUS, LIVE } = require("./config.json");
+const { parse } = require('dotenv');
+require('dotenv').config();
 const discord = require("discord.js");
 const client = new discord.Client();
 const ytdl = require('ytdl-core');
 let broadcast = null;
 let interval = null;
 
-if (!TOKEN) {
-  console.error("Please provide a valid Discord Bot Token.");
-  return process.exit(1);
-} else if (!CHANNEL || Number(CHANNEL) == NaN) {
-  console.log("Please provide a valid channel ID.");
-  return process.exit(1);
-} else if (!ytdl.validateURL(LIVE)) {
-  console.log("Please provide a valid Youtube URL.");
-  return process.exit(1);
-}
-
 client.on('ready', async () => {
-  client.user.setActivity(STATUS || "Radio");
+  client.user.setActivity("le live du shewley studio", {
+    type: "LISTENING",
+  });
   let channel = client.channels.cache.get(CHANNEL) || await client.channels.fetch(CHANNEL)
 
-  if (!channel) {
-    console.error("The provided channel ID doesn't exist, or I don't have permission to view that channel. Because of that, I'm aborting now.");
-    return process.exit(1);
-  } else if (channel.type !== "voice") {
-    console.error("The provided channel ID is NOT voice channel. Because of that, I'm aborting now.");
-    return process.exit(1);
-  }
   broadcast = client.voice.createBroadcast();
   // Play the radio
   stream = ytdl(LIVE);
@@ -64,6 +50,6 @@ setInterval(async function() {
   }
 }, 20000);
 
-client.login(TOKEN) //Login
+client.login(process.env.TOKEN) //Login
 
 process.on('unhandledRejection', console.error);
